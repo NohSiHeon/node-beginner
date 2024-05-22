@@ -1,14 +1,26 @@
 import express from "express";
 import { Product } from "../schemas/product.schemas.js";
+import { createProductValidator } from "../middlewares/validators/create-product.validator.middlware.js";
+import { deleteProductValidator } from "../middlewares/validators/delete-product.validator.middlware.js";
+import { updateProductValidator } from "../middlewares/validators/update-product.validator.middlware.js";
 
 const productRouter = express.Router();
 
 // 상품 생성 (CREATE)
-productRouter.post('/products', async (req, res, next) => {
+productRouter.post('/products', createProductValidator, async (req, res, next) => {
 	try {
+
 		// 상품 정보 파싱하기
 		// request Body 정보를 구조 분해 할당
 		const { name, description, manager, password } = req.body;
+
+		// // 유효성 검증 방법
+		// if (!name || !description || !manager || !password) {
+		// 	return res.status(400).json({
+		// 		status: 400,
+		// 		message: '상품 정보를 모두 입력해 주세요.',
+		// 	});
+		// }
 
 		// DB에서 있는 이름인지 조회하기
 		const existedProduct = await Product.findOne({ name });
@@ -77,7 +89,7 @@ productRouter.get('/products/:id', async (req, res, next) => {
 
 });
 // 상품 수정 (UPDATE)
-productRouter.put('/products/:id', async (req, res, next) => {
+productRouter.put('/products/:id', updateProductValidator, async (req, res, next) => {
 
 	try {
 		// 상품 ID 파싱하기
@@ -130,7 +142,7 @@ productRouter.put('/products/:id', async (req, res, next) => {
 
 });
 // 상품 삭제 (DELETE)
-productRouter.delete('/products/:id', async (req, res, next) => {
+productRouter.delete('/products/:id', deleteProductValidator, async (req, res, next) => {
 	try {
 		// 상품 ID 파싱하기
 		const { id } = req.params;
