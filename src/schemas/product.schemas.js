@@ -15,7 +15,7 @@ const productSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	passord: {
+	password: {
 		type: String,
 		requried: true,
 		select: false,

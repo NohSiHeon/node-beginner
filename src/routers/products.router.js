@@ -44,28 +44,74 @@ productRouter.get('/products/:id', async (req, res) => {
 		.json({ status: 200, message: '상품 상제 조회에 성공했습니다.', data });
 });
 // 상품 수정 (UPDATE)
-productRouter.put('/products/:id', (req, res) => {
+productRouter.put('/products/:id', async (req, res) => {
 	// 상품 ID 파싱하기
+	const { id } = req.params;
 
 	// 상품 수정 정보 파싱하기
+	const { name, description, manager, status, password } = req.body;
 
 	// DB에서 조회하기 (패스워드 포함)
+	const existedProduct = await Product.findById(id, { password: true });
+
 	// 비밀번호 일치 여부 확인
+	const isPasswordMatched = password === existedProduct.password;
+
+	if (!isPasswordMatched) {
+		return res.status(401).json({
+			status: 401,
+			mesaage: "비밀번호가 일치하지 않습니다."
+		});
+	}
+	const productInfo = {
+		...(name && { name }),
+		...(description && { description }),
+		...(manager && { manager }),
+		...(status && { status }),
+	};
+
+	// DB에 갱신하기
+	const data = await Product.findByIdAndUpdate(id, productInfo, { new: true });
 
 	// 완료 메시지 반환하기
+	return res.status(200).json({
+		status: 200,
+		message: '상품 수정에 성공했습니다.',
+		data
+	});
 
 
 });
 // 상품 삭제 (DELETE)
-productRouter.delete('/products/:id', (req, res) => {
+productRouter.delete('/products/:id', async (req, res) => {
 	// 상품 ID 파싱하기
+	const { id } = req.params;
+
+	// 패스워드파싱하기
+	const { password } = req.body;
 
 	// DB에서 조회하기 (패스워드 포함)
+	const existedProduct = await Product.findById(id, { password: true });
+
 	// 비밀번호 일치 여부 확인
+	const isPasswordMatched = password === existedProduct.password;
+
+	if (!isPasswordMatched) {
+		return res.status(401).json({
+			status: 401,
+			mesaage: "비밀번호가 일치하지 않습니다."
+		});
+	}
 
 	// DB에서 삭제하기
+	const data = await Product.findByIdAndDelete(id);
 
 	// 완료 메시지 반환하기
+	return res.status(200).json({
+		status: 200,
+		message: '상품 삭제에 성공했습니다.',
+		data
+	});
 });
 
 export { productRouter };
